@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1e2a44">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Lantern Debt">
+<title>Lantern Debt — Debt Payoff Tracker</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root,[data-theme="sky-light"]{
+  --bg:#F4F8FC; --card:#ffffff; --ink:#0B1B2B; --muted:#6E7782; --line:#E3E9EF;
+  --amber:#3CA1FC; --amber-soft:#EBF4FC; --on-accent:#ffffff; --green:#1E9E76; --green-soft:#E2F6EF; --red:#D0544B; --red-soft:#FBE7E6;
+  --navy:#0E3557; --hero2:#1A5A8F; --hero-hi:#A8D6FF; --shadow:0 6px 20px rgba(14,53,87,.08);
+  --serif:'Fraunces',Georgia,serif; --sans:'Inter',system-ui,-apple-system,Segoe UI,Roboto,sans-serif;
+}
+[data-theme="sky-dark"]{
+  --bg:#0D1620; --card:#15212E; --ink:#EAF2FA; --muted:#93A3B3; --line:#243444;
+  --amber:#5AB2FF; --amber-soft:#1A3045; --on-accent:#08121c; --green:#3CCB9C; --green-soft:#173A31; --red:#F08A84; --red-soft:#3A2226;
+  --navy:#15385A; --hero2:#0F2236; --hero-hi:#A8D6FF; --shadow:0 6px 20px rgba(0,0,0,.35);
+}
+[data-theme="leaf-light"]{
+  --bg:#FAF8F7; --card:#ffffff; --ink:#26231D; --muted:#85837F; --line:#E9E7E6;
+  --amber:#66A315; --amber-soft:#EDF0E3; --on-accent:#ffffff; --green:#507618; --green-soft:#E6EED6; --red:#C2554A; --red-soft:#F8E1DE;
+  --navy:#2E4310; --hero2:#4A6A1A; --hero-hi:#D4F29A; --shadow:0 6px 20px rgba(46,67,16,.08);
+}
+[data-theme="leaf-dark"]{
+  --bg:#151912; --card:#1F251A; --ink:#EEF2E6; --muted:#A3A898; --line:#2F3826;
+  --amber:#8CC63F; --amber-soft:#2A3520; --on-accent:#16200B; --green:#A6D65E; --green-soft:#263320; --red:#EA8F84; --red-soft:#3A2522;
+  --navy:#2A3B1C; --hero2:#192312; --hero-hi:#C8F07E; --shadow:0 6px 20px rgba(0,0,0,.35);
+}
+[data-theme="honey-light"]{
+  --bg:#FFFCF5; --card:#ffffff; --ink:#232323; --muted:#868686; --line:#ECECEC;
+  --amber:#FBB605; --amber-soft:#FEF8E8; --on-accent:#232323; --green:#2F8F6B; --green-soft:#E1F2EA; --red:#C2554A; --red-soft:#F8E1DE;
+  --navy:#3A2E0E; --hero2:#6A5115; --hero-hi:#FFD15C; --shadow:0 6px 20px rgba(58,46,14,.08);
+}
+[data-theme="honey-dark"]{
+  --bg:#16130C; --card:#221D12; --ink:#F6F0E0; --muted:#ABA38F; --line:#352E1E;
+  --amber:#FBB605; --amber-soft:#3A3018; --on-accent:#1D1704; --green:#5CC49B; --green-soft:#1F3A30; --red:#E98B80; --red-soft:#3E2630;
+  --navy:#3D3010; --hero2:#211A08; --hero-hi:#FFD15C; --shadow:0 6px 20px rgba(0,0,0,.35);
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--ink);min-height:100vh;padding-bottom:calc(84px + env(safe-area-inset-bottom));-webkit-font-smoothing:antialiased}
+button,input,select{font:inherit;color:inherit}
+.wrap{max-width:640px;margin:0 auto;padding:16px}
+header.top{display:flex;align-items:center;justify-content:space-between;padding:6px 2px 14px}
+.brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:22px;font-weight:700}
+.brand svg{width:30px;height:30px}
+.hello{color:var(--muted);font-size:14px}
+.demo-banner{background:var(--amber-soft);border:1px solid var(--amber);border-radius:14px;padding:12px 14px;font-size:14px;margin-bottom:14px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.demo-banner a{color:var(--ink);font-weight:700}
+.card{background:var(--card);border:1px solid var(--line);border-radius:18px;padding:18px;box-shadow:var(--shadow);margin-bottom:14px}
+.card h2{font-family:var(--serif);font-size:20px;margin-bottom:10px}
+.card h3{font-size:13px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:6px;font-weight:700}
+.hero{text-align:center;padding:24px 18px;background:linear-gradient(160deg,var(--navy),var(--hero2));color:#fff;border:none}
+.hero h3{color:rgba(255,255,255,.7)}
+.hero .big{font-family:var(--serif);font-size:clamp(36px,10vw,52px);line-height:1.05;margin:4px 0 6px;color:var(--hero-hi)}
+.hero .sub{color:rgba(255,255,255,.85);font-size:15px}
+.ring-row{display:flex;align-items:center;gap:18px;margin-top:18px;justify-content:center;flex-wrap:wrap}
+.ring{position:relative;width:118px;height:118px}
+.ring svg{transform:rotate(-90deg)}
+.ring .pct{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:var(--serif);font-size:26px}
+.ring .pct small{font-family:var(--sans);font-size:11px;color:rgba(255,255,255,.7);letter-spacing:.06em}
+.stats{display:grid;gap:8px;text-align:left}
+.stats div{font-size:14px;color:rgba(255,255,255,.8)}
+.stats b{display:block;font-size:20px;color:#fff;font-weight:700}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{background:var(--bg);border-radius:14px;padding:12px}
+.stat .v{font-family:var(--serif);font-size:22px;font-weight:700}
+.stat .l{font-size:12px;color:var(--muted)}
+.focus{border:2px solid var(--amber)}
+.pill{display:inline-block;padding:3px 10px;border-radius:999px;font-size:12px;font-weight:700;background:var(--amber-soft);color:var(--ink)}
+.pill.green{background:var(--green-soft);color:var(--green)}
+.pill.red{background:var(--red-soft);color:var(--red)}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:10px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:none}
+.row .name{font-weight:600}
+.row .meta{font-size:13px;color:var(--muted)}
+.amt{font-weight:700;white-space:nowrap}
+.bar{height:8px;border-radius:999px;background:var(--line);overflow:hidden;margin-top:8px}
+.bar i{display:block;height:100%;background:var(--green);border-radius:999px}
+.debt-card{position:relative}
+.debt-card .top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px}
+.debt-card .bal{font-family:var(--serif);font-size:26px;font-weight:700}
+.debt-card .meta{font-size:13px;color:var(--muted);margin-top:4px}
+.debt-card.paid{opacity:.75}
+.actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+.btn{border:1.5px solid var(--line);background:var(--card);padding:10px 14px;border-radius:12px;font-weight:600;cursor:pointer;font-size:14px}
+.btn:hover{border-color:var(--amber)}
+.btn.primary{background:var(--amber);color:var(--on-accent);border-color:var(--amber)}
+.btn.amber{background:var(--amber);border-color:var(--amber);color:var(--on-accent)}
+.btn.danger{color:var(--red)}
+.btn.block{width:100%;padding:14px;font-size:16px}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);background:var(--bg);border-radius:12px;padding:4px;gap:4px}
+.seg button{border:none;background:none;padding:10px 6px;border-radius:9px;font-weight:600;font-size:14px;cursor:pointer;color:var(--muted)}
+.seg button.on{background:var(--card);color:var(--ink);box-shadow:0 1px 4px rgba(0,0,0,.12)}
+.hint{font-size:13px;color:var(--muted);margin-top:8px;line-height:1.45}
+label.f{display:grid;gap:6px;font-size:13px;font-weight:600;color:var(--muted);margin-bottom:12px}
+input.i,select.i{padding:12px 14px;border:1.5px solid var(--line);border-radius:12px;background:var(--bg);font-size:16px;width:100%}
+input.i:focus,select.i:focus{outline:2px solid var(--amber);border-color:transparent}
+.warn{background:var(--red-soft);color:var(--red);border-radius:12px;padding:12px;font-size:14px;margin-bottom:12px;font-weight:500}
+.good{background:var(--green-soft);color:var(--green);border-radius:12px;padding:12px;font-size:14px;margin-bottom:12px;font-weight:600}
+.timeline .t{display:grid;grid-template-columns:110px 1fr;gap:10px;align-items:center;margin:8px 0;font-size:13px}
+.timeline .track{height:22px;background:var(--bg);border-radius:6px;position:relative;overflow:hidden}
+.timeline .fill{position:absolute;top:0;bottom:0;left:0;border-radius:6px;background:var(--amber);display:flex;align-items:center;justify-content:flex-end;padding-right:6px;font-size:11px;font-weight:700;color:var(--on-accent);white-space:nowrap}
+.timeline .nm{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-weight:600}
+table.plan{width:100%;border-collapse:collapse;font-size:13px}
+table.plan th,table.plan td{padding:8px 6px;border-bottom:1px solid var(--line);text-align:right;white-space:nowrap}
+table.plan th:first-child,table.plan td:first-child{text-align:left}
+table.plan th{color:var(--muted);font-weight:600;font-size:12px}
+table.plan td.done{color:var(--green);font-weight:700}
+.scrollx{overflow-x:auto}
+.badges{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.badge{text-align:center;padding:12px 6px;border-radius:14px;background:var(--bg);font-size:12px;color:var(--muted);font-weight:600}
+.badge .e{font-size:26px;display:block;margin-bottom:4px;filter:grayscale(1);opacity:.4}
+.badge.got{background:var(--amber-soft);color:var(--ink)}
+.badge.got .e{filter:none;opacity:1}
+nav.tabs{position:fixed;left:0;right:0;bottom:0;background:var(--card);border-top:1px solid var(--line);display:flex;justify-content:center;padding-bottom:env(safe-area-inset-bottom);z-index:20}
+nav.tabs .in{display:grid;grid-template-columns:repeat(5,1fr);max-width:640px;width:100%}
+nav.tabs button{border:none;background:none;padding:10px 4px 12px;font-size:11px;font-weight:600;color:var(--muted);display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer}
+nav.tabs button span{font-size:20px}
+nav.tabs button.on{color:var(--ink)}
+nav.tabs button.on span{transform:scale(1.1)}
+.fab{position:fixed;right:18px;bottom:calc(86px + env(safe-area-inset-bottom));width:56px;height:56px;border-radius:50%;border:none;background:var(--amber);color:var(--on-accent);font-size:30px;box-shadow:0 8px 20px rgba(0,0,0,.25);cursor:pointer;z-index:21}
+dialog{border:none;border-radius:20px;padding:0;width:min(92vw,460px);background:var(--card);color:var(--ink);box-shadow:0 20px 60px rgba(0,0,0,.35)}
+dialog::backdrop{background:rgba(15,20,35,.55)}
+dialog form{padding:20px}
+dialog h2{font-family:var(--serif);font-size:22px;margin-bottom:14px}
+.dlg-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:6px}
+.empty{text-align:center;padding:30px 10px;color:var(--muted)}
+.empty .e{font-size:44px;margin-bottom:8px}
+.toast{position:fixed;left:50%;bottom:calc(150px + env(safe-area-inset-bottom));transform:translateX(-50%);background:var(--ink);color:var(--card)!important;color:#fff;padding:12px 18px;border-radius:12px;font-weight:600;font-size:14px;z-index:60;opacity:0;transition:opacity .3s;pointer-events:none;max-width:90vw;text-align:center}
+.toast.show{opacity:1}
+.celebrate{position:fixed;inset:0;display:none;align-items:center;justify-content:center;z-index:70;background:rgba(15,20,35,.55);padding:20px}
+.celebrate.show{display:flex}
+.celebrate .box{background:var(--card);border-radius:22px;padding:28px 24px;text-align:center;max-width:380px;animation:pop .5s cubic-bezier(.2,1.4,.4,1)}
+.celebrate .box .e{font-size:56px}
+.celebrate .box h2{font-family:var(--serif);font-size:26px;margin:8px 0}
+@keyframes pop{from{transform:scale(.7);opacity:0}to{transform:none;opacity:1}}
+#confetti{position:fixed;inset:0;pointer-events:none;z-index:80}
+.spark{width:100%;height:auto;display:block;margin-top:8px}
+.muted{color:var(--muted)}
+.hidden{display:none!important}
+.how{font-size:14px;line-height:1.55}
+.how summary{cursor:pointer;font-weight:600;color:var(--muted);font-size:13px;margin-top:10px}
+.how p{margin-top:8px;color:var(--muted)}
+
+.pal-row{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+.pal{border:2px solid var(--line);border-radius:14px;padding:10px 6px;background:var(--card);cursor:pointer;font-weight:600;font-size:13px;display:flex;flex-direction:column;align-items:center;gap:6px}
+.pal.on{border-color:var(--amber)}
+.pal i{display:flex;gap:3px}.pal i b{width:16px;height:16px;border-radius:50%;display:block}
+.dash{display:block}
+.side-brand{display:none}
+@media (min-width:1000px){
+  body{padding-bottom:0;padding-left:236px}
+  .wrap{max-width:1180px;padding:28px 36px}
+  header.top .brand{display:none}
+  header.top{justify-content:flex-end}
+  nav.tabs{top:0;bottom:0;right:auto;width:236px;border-top:none;border-right:1px solid var(--line);flex-direction:column;justify-content:flex-start;padding:24px 14px}
+  nav.tabs .in{display:flex;flex-direction:column;gap:4px}
+  nav.tabs button{flex-direction:row;justify-content:flex-start;gap:12px;font-size:15px;padding:12px 14px;border-radius:12px}
+  nav.tabs button.on{background:var(--amber-soft)}
+  .side-brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:22px;font-weight:700;padding:4px 10px 22px;color:var(--ink)}
+  .side-brand svg{width:30px;height:30px}
+  .fab{bottom:28px;right:32px}
+  .dash{display:grid;grid-template-columns:1.1fr 1fr;gap:18px;align-items:start}
+  .debt-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .debt-grid .card{margin-bottom:0}
+  .grid4{grid-template-columns:repeat(4,1fr)!important}
+  .plan-cols{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+  .hero .big{font-size:56px}
+  .toast{bottom:40px}
+}
+</style>
+</head>
+<body>
+<canvas id="confetti"></canvas>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12 4h8M16 4v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="7" width="14" height="19" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 12c2.4 2.3 2.4 6 0 8-2.4-2-2.4-5.7 0-8z" style="fill:var(--amber)"/><path d="M11 26h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      Lantern Debt
+    </div>
+    <div class="hello" id="hello"></div>
+  </header>
+  <div id="demoBanner" class="demo-banner hidden"></div>
+  <main id="view"></main>
+</div>
+
+<button class="fab" id="fab" aria-label="Log a payment">+</button>
+
+<nav class="tabs"><div class="side-brand"><svg viewBox="0 0 32 32" aria-hidden="true"><path d="M12 4h8M16 4v3" stroke="currentColor" stroke-width="2" stroke-linecap="round"/><rect x="9" y="7" width="14" height="19" rx="4" fill="none" stroke="currentColor" stroke-width="2"/><path d="M16 12c2.4 2.3 2.4 6 0 8-2.4-2-2.4-5.7 0-8z" style="fill:var(--amber)"/><path d="M11 26h10" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>Lantern Debt</div><div class="in">
+  <button data-tab="home" class="on"><span>🏠</span>Home</button>
+  <button data-tab="debts"><span>💳</span>Debts</button>
+  <button data-tab="plan"><span>🗺️</span>Plan</button>
+  <button data-tab="payments"><span>✅</span>Payments</button>
+  <button data-tab="settings"><span>⚙️</span>Settings</button>
+</div></nav>
+
+<!-- Debt dialog -->
+<dialog id="debtDlg"><form method="dialog" id="debtForm">
+  <h2 id="debtDlgTitle">Add a debt</h2>
+  <label class="f">Name<input class="i" id="dName" required maxlength="40" placeholder="e.g. Visa card, Car loan"></label>
+  <label class="f">Type<select class="i" id="dType">
+    <option>Credit card</option><option>Personal loan</option><option>Car loan</option><option>Student loan</option><option>Medical bill</option><option>Buy now, pay later</option><option>Family or friend</option><option>Mortgage</option><option>Other</option>
+  </select></label>
+  <div class="grid2">
+    <label class="f">Balance now<input class="i" id="dBal" type="number" inputmode="decimal" min="0" step="0.01" required></label>
+    <label class="f">Interest rate (APR %)<input class="i" id="dApr" type="number" inputmode="decimal" min="0" max="100" step="0.01" placeholder="0 if none"></label>
+  </div>
+  <label class="f">Minimum monthly payment<input class="i" id="dMin" type="number" inputmode="decimal" min="0" step="0.01" required></label>
+  <div class="hint" id="dHint" style="margin:-4px 0 12px"></div>
+  <div class="dlg-actions">
+    <button type="button" class="btn danger hidden" id="dDelete">Delete</button>
+    <span style="flex:1"></span>
+    <button type="button" class="btn" value="cancel" id="dCancel">Cancel</button>
+    <button type="submit" class="btn primary" id="dSave">Save</button>
+  </div>
+</form></dialog>
+
+<!-- Payment dialog -->
+<dialog id="payDlg"><form method="dialog" id="payForm">
+  <h2>Log a payment</h2>
+  <label class="f">Which debt?<select class="i" id="pDebt"></select></label>
+  <div class="grid2">
+    <label class="f">Amount paid<input class="i" id="pAmt" type="number" inputmode="decimal" min="0.01" step="0.01" required></label>
+    <label class="f">Date<input class="i" id="pDate" type="date" required></label>
+  </div>
+  <label class="f">Note (optional)<input class="i" id="pNote" maxlength="60" placeholder="e.g. tax refund 🎉"></label>
+  <div class="hint" style="margin:-4px 0 12px">This takes the amount off the balance. If interest was added, use <b>Update balance</b> on the debt instead.</div>
+  <div class="dlg-actions">
+    <button type="button" class="btn" id="pCancel">Cancel</button>
+    <button type="submit" class="btn primary">Save payment</button>
+  </div>
+</form></dialog>
+
+<!-- Balance dialog -->
+<dialog id="balDlg"><form method="dialog" id="balForm">
+  <h2>Update balance</h2>
+  <p class="hint" style="margin:-6px 0 14px">Type the balance from your latest statement or app. Use this after interest or new charges.</p>
+  <label class="f" id="balLabel">New balance<input class="i" id="bVal" type="number" inputmode="decimal" min="0" step="0.01" required></label>
+  <div class="dlg-actions">
+    <button type="button" class="btn" id="bCancel">Cancel</button>
+    <button type="submit" class="btn primary">Save</button>
+  </div>
+</form></dialog>
+
+<div class="celebrate" id="celebrate"><div class="box">
+  <div class="e" id="celE">🎉</div><h2 id="celT">Paid off!</h2><p class="muted" id="celP"></p>
+  <button class="btn primary" style="margin-top:16px" id="celClose">Keep going</button>
+</div></div>
+<div class="toast" id="toast"></div>
+<input type="file" id="importFile" accept=".json,application/json" class="hidden">
+
+<script>
+/* ===== Lantern Debt ===== */
+const DEMO = true;                 // set by the build: true for the free demo
+const SHOP_LINK = "https://www.etsy.com/shop/LittleLanternApps";
+const DEMO_MAX_DEBTS = 2, DEMO_MAX_PAYMENTS = 10;
+const KEY = DEMO ? "lanternDebt.demo.v1" : "lanternDebt.v1";
+
+const CURRENCIES = [["USD","US dollar $"],["CAD","Canadian dollar $"],["AUD","Australian dollar $"],["NZD","New Zealand dollar $"],["GBP","British pound £"],["EUR","Euro €"],["CHF","Swiss franc"],["SEK","Swedish krona kr"],["NOK","Norwegian krone kr"],["DKK","Danish krone kr"],["PLN","Polish złoty zł"],["INR","Indian rupee ₹"],["JPY","Japanese yen ¥"],["ZAR","South African rand R"],["MXN","Mexican peso $"],["BRL","Brazilian real R$"],["MAD","Moroccan dirham"],["AED","UAE dirham"],["SGD","Singapore dollar $"],["PHP","Philippine peso ₱"]];
+
+const $ = s => document.querySelector(s);
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const uid = () => Math.random().toString(36).slice(2,10);
+const round2 = n => Math.round(n*100)/100;
+const today = () => { const d=new Date(); return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`; };
+
+const THEMES = {sky:["Sky Mint","#3CA1FC","#28B68A","#EBF4FC"], leaf:["Leaf Olive","#66A315","#507618","#EDF0E3"], honey:["Honey","#FBB605","#AF8310","#FEF8E8"]};
+let S = load();
+(function(){ const t=S.settings.theme; if (t==="light") S.settings.theme="sky-light"; if (t==="dark") S.settings.theme="sky-dark";
+  const q=new URLSearchParams(location.search).get("theme"); const ok=q && /^(sky|leaf|honey)-(light|dark)$/.test(q);
+  if (ok && !S.settings.themeLocked) S.settings.theme=q;
+  if (!/^(sky|leaf|honey)-(light|dark)$/.test(S.settings.theme)) S.settings.theme="sky-light"; })();
+const pal = () => S.settings.theme.split("-")[0], mode = () => S.settings.theme.split("-")[1];
+function blank(){ return {debts:[],payments:[],settings:{strategy:"snowball",budget:0,currency:"USD",theme:"sky-light",themeLocked:false,name:"",customOrder:[]},milestones:[],created:today()}; }
+function load(){
+  try { const s = JSON.parse(localStorage.getItem(KEY)); if (s && Array.isArray(s.debts)) return Object.assign(blank(), s, {settings:Object.assign(blank().settings, s.settings)}); } catch(e){}
+  return blank();
+}
+function save(){ try { localStorage.setItem(KEY, JSON.stringify(S)); } catch(e){ toast("Couldn't save on this device. Is private browsing on?"); } }
+
+function money(n, dec){
+  const cur = S.settings.currency || "USD";
+  const d = dec ?? (Math.abs(n) >= 1000 ? 0 : 2);
+  try { return new Intl.NumberFormat(undefined,{style:"currency",currency:cur,minimumFractionDigits:cur==="JPY"?0:d,maximumFractionDigits:cur==="JPY"?0:d}).format(n); }
+  catch(e){ return n.toFixed(d); }
+}
+function monthLabel(offset, long){
+  const d = new Date(); d.setDate(1); d.setMonth(d.getMonth()+offset);
+  return d.toLocaleDateString(undefined, long ? {month:"long",year:"numeric"} : {month:"short",year:"numeric"});
+}
+const active = () => S.debts.filter(d => d.balance > 0.004);
+const totals = () => {
+  const orig = S.debts.reduce((a,d)=>a+Math.max(d.original,d.balance),0);
+  const left = S.debts.reduce((a,d)=>a+d.balance,0);
+  return {orig, left, paid: Math.max(0, orig-left), pct: orig>0 ? Math.min(100, (orig-left)/orig*100) : 0};
+};
+const sumMins = () => active().reduce((a,d)=>a+d.minPay,0);
+
+/* ---------- Payoff engine ---------- */
+function orderDebts(list, strategy){
+  const a = list.slice();
+  if (strategy === "avalanche") a.sort((x,y)=> (y.apr-x.apr) || (x.balance-y.balance));
+  else if (strategy === "custom") { const o=S.settings.customOrder; a.sort((x,y)=> (o.indexOf(x.id)+1||999)-(o.indexOf(y.id)+1||999)); }
+  else a.sort((x,y)=> (x.balance-y.balance) || (y.apr-x.apr));
+  return a;
+}
+// Monthly simulation. rollover=false → minimum payments only, nothing extra.
+function simulate(strategy, budget, rollover=true){
+  const order = orderDebts(active(), strategy).map(d=>({id:d.id,name:d.name,bal:d.balance,r:d.apr/1200,min:d.minPay}));
+  const res = {months:0,interest:0,paid:{},rows:[],ok:true,reason:""};
+  if (!order.length) return res;
+  for (let m=0; m<600; m++){
+    if (order.every(d=>d.bal<=0.004)) break;
+    const row = {m,pay:{},left:0}; let pool = rollover ? budget : Infinity;
+    for (const d of order){ if (d.bal>0.004){ const i=round2(d.bal*d.r); d.bal=round2(d.bal+i); res.interest+=i; } }
+    for (const d of order){ if (d.bal<=0.004) continue; const p=Math.min(d.min,d.bal,pool); d.bal=round2(d.bal-p); pool-=p; row.pay[d.id]=(row.pay[d.id]||0)+p; }
+    if (rollover){ for (const d of order){ if (pool<=0.004) break; if (d.bal<=0.004) continue; const p=Math.min(d.bal,pool); d.bal=round2(d.bal-p); pool-=p; row.pay[d.id]=(row.pay[d.id]||0)+p; } }
+    for (const d of order){ if (d.bal<=0.004 && res.paid[d.id]===undefined){ res.paid[d.id]=m; } row.left+=Math.max(0,d.bal); }
+    res.rows.push(row); res.months=m+1;
+  }
+  if (!order.every(d=>d.bal<=0.004)){ res.ok=false; res.reason="These payments don't cover the interest, so the balance never reaches zero."; }
+  res.interest = round2(res.interest);
+  res.order = order.map(d=>d.id);
+  return res;
+}
+function plan(){
+  const mins = sumMins();
+  const budget = Math.max(S.settings.budget||0, mins);
+  return {budget, mins, short: (S.settings.budget||0) < mins - 0.004, main: simulate(S.settings.strategy, budget), minOnly: simulate("snowball", mins, false)};
+}
+
+/* ---------- Views ---------- */
+let tab = "home";
+function render(){
+  document.documentElement.dataset.theme = S.settings.theme;
+  document.body.dataset.theme = S.settings.theme;
+  document.querySelector('meta[name=theme-color]').content = getComputedStyle(document.documentElement).getPropertyValue("--navy").trim();
+  $("#hello").textContent = S.settings.name ? `Hi, ${S.settings.name}` : "";
+  document.querySelectorAll("nav.tabs button").forEach(b=>b.classList.toggle("on", b.dataset.tab===tab));
+  $("#fab").classList.toggle("hidden", !active().length || tab==="settings");
+  if (DEMO){ const b=$("#demoBanner"); b.classList.remove("hidden"); b.innerHTML = `<span>🔦 <b>Free demo:</b> up to ${DEMO_MAX_DEBTS} debts and ${DEMO_MAX_PAYMENTS} payments.</span><a href="${SHOP_LINK}" target="_blank" rel="noopener">Get the full app →</a>`; }
+  $("#view").innerHTML = ({home:viewHome,debts:viewDebts,plan:viewPlan,payments:viewPayments,settings:viewSettings})[tab]();
+  bindView();
+}
+function ring(pct){
+  const r=50,c=2*Math.PI*r,off=c*(1-pct/100);
+  return `<div class="ring"><svg width="118" height="118" viewBox="0 0 118 118"><circle cx="59" cy="59" r="${r}" fill="none" stroke="rgba(255,255,255,.18)" stroke-width="10"/><circle cx="59" cy="59" r="${r}" fill="none" style="stroke:var(--hero-hi)" stroke-width="10" stroke-linecap="round" stroke-dasharray="${c}" stroke-dashoffset="${off}"/></svg><div class="pct">${Math.floor(pct)}%<small>PAID OFF</small></div></div>`;
+}
+function spark(rows, start){
+  if (!rows.length) return "";
+  const pts=[start,...rows.map(r=>r.left)], max=Math.max(...pts)||1, W=600, H=120, n=pts.length-1||1;
+  const xy=pts.map((v,i)=>`${(i/n*W).toFixed(1)},${(H-6-(v/max)*(H-16)).toFixed(1)}`);
+  return `<svg class="spark" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none" aria-label="Projected balance going down to zero"><polygon points="0,${H} ${xy.join(" ")} ${W},${H}" fill="var(--amber-soft)"/><polyline points="${xy.join(" ")}" fill="none" stroke="var(--amber)" stroke-width="3" vector-effect="non-scaling-stroke"/></svg><div style="display:flex;justify-content:space-between;font-size:12px" class="muted"><span>Now · ${money(start,0)}</span><span>${monthLabel(rows.length-1)} · ${money(0,0)}</span></div>`;
+}
+function emptyState(){
+  return `<div class="card"><div class="empty"><div class="e">🏮</div><h2 style="font-family:var(--serif);color:var(--ink)">Let's light the way out of debt</h2><p style="margin:8px 0 18px">Add each debt you owe, and Lantern Debt shows you which one to pay first and the month you'll be debt-free.</p><button class="btn amber block" data-act="addDebt">+ Add your first debt</button></div></div>
+  <div class="card how"><h2>How it works</h2><p class="muted">1. Add your debts: balance, interest rate and minimum payment.<br>2. Set how much you can pay toward debt each month.<br>3. Pick a plan: <b>Snowball</b> (smallest first, quick wins) or <b>Avalanche</b> (highest interest first, saves the most).<br>4. Log payments and watch your debt-free date get closer.</p><p class="muted" style="margin-top:10px">🔒 Everything stays on this device. No account, no bank login.</p></div>`;
+}
+function viewHome(){
+  if (!S.debts.length) return emptyState();
+  const t = totals(), P = plan(), m = P.main;
+  if (!active().length) return `<div class="card hero"><h3>You did it</h3><div class="big">Debt free! 🎉</div><div class="sub">You paid off ${money(t.paid)} across ${S.debts.length} debt${S.debts.length>1?"s":""}.</div></div>${badgesCard()}`;
+  const nameOf = id => S.debts.find(d=>d.id===id)?.name || "";
+  const focusId = m.order?.find(id=>S.debts.find(d=>d.id===id).balance>0);
+  const first = m.rows[0] || {pay:{}};
+  const thisMonth = (m.order||[]).filter(id=>first.pay[id]>0).map(id=>{
+    const d=S.debts.find(x=>x.id===id); const extra = round2(first.pay[id]-Math.min(d.minPay,d.balance));
+    return `<div class="row"><div><div class="name">${esc(d.name)} ${id===focusId?'<span class="pill">Focus</span>':""}</div><div class="meta">${extra>0.004?`Minimum ${money(d.minPay)} + extra ${money(extra)}`:"Minimum payment"}</div></div><div class="amt">${money(first.pay[id])}</div></div>`;
+  }).join("");
+  const saved = P.minOnly.ok ? round2(P.minOnly.interest - m.interest) : null;
+  const monthsSaved = P.minOnly.ok ? P.minOnly.months - m.months : null;
+  return `<div class="dash"><div class="col">
+  <div class="card hero">
+    <h3>Debt-free date</h3>
+    <div class="big">${m.ok ? monthLabel(m.months-1,true) : "Not yet"}</div>
+    <div class="sub">${m.ok ? `${m.months} month${m.months>1?"s":""} to go with ${stratName()}` : "Raise your monthly payment to get a date"}</div>
+    <div class="ring-row">${ring(t.pct)}<div class="stats"><div>Left to pay<b>${money(t.left)}</b></div><div>Paid off so far<b>${money(t.paid)}</b></div></div></div>
+  </div>
+  ${P.short ? `<div class="warn">Your monthly debt budget (${money(S.settings.budget||0)}) is less than your minimum payments (${money(P.mins)}). The plan below uses ${money(P.mins)}. <a href="#" data-go="plan">Change it</a></div>` : ""}
+  ${!m.ok ? `<div class="warn">${m.reason} <a href="#" data-go="plan">Raise your monthly payment</a></div>` : ""}
+  </div><div class="col">
+  <div class="card focus"><h3>This month's plan · ${monthLabel(0,true)}</h3>${thisMonth}<div class="row"><div class="name">Total</div><div class="amt">${money(P.budget)}</div></div></div>
+  ${m.ok && saved>0.5 ? `<div class="good">💡 Compared with paying only the minimums, your plan saves <b>${money(saved,0)}</b> in interest${monthsSaved>0?` and gets you out <b>${monthsSaved} months</b> sooner`:""}.</div>` : ""}
+  ${m.ok ? `<div class="card"><h3>Your balance, month by month</h3>${spark(m.rows, t.left)}</div>` : ""}
+  ${badgesCard()}</div></div>`;
+}
+const stratName = () => ({snowball:"the Snowball plan",avalanche:"the Avalanche plan",custom:"your own order"})[S.settings.strategy];
+const BADGES = [["first","🌱","First payment"],["debt1","🔥","First debt gone"],["p25","⭐","25% paid"],["p50","🌗","Halfway there"],["p75","🚀","75% paid"],["free","🏆","Debt free"]];
+function badgesCard(){
+  return `<div class="card"><h3>Milestones</h3><div class="badges">${BADGES.map(([k,e,l])=>`<div class="badge ${S.milestones.includes(k)?"got":""}"><span class="e">${e}</span>${l}</div>`).join("")}</div></div>`;
+}
+function viewDebts(){
+  if (!S.debts.length) return emptyState();
+  const P = plan(); const order = orderDebts(S.debts, S.settings.strategy);
+  const cards = order.map((d,i)=>{
+    const paidPct = d.original>0 ? Math.min(100,(Math.max(d.original,d.balance)-d.balance)/Math.max(d.original,d.balance)*100) : 0;
+    const when = d.balance<=0.004 ? '<span class="pill green">Paid off ✓</span>' : (P.main.paid[d.id]!==undefined ? `<span class="pill">Gone by ${monthLabel(P.main.paid[d.id])}</span>` : '<span class="pill red">No payoff date</span>');
+    const interestNow = d.balance*d.apr/1200;
+    return `<div class="card debt-card ${d.balance<=0.004?"paid":""}">
+      <div class="top"><div><div class="meta">${S.settings.strategy==="custom"?"":`#${i+1} · `}${esc(d.type)}</div><div class="name" style="font-size:18px;font-weight:700">${esc(d.name)}</div></div>${when}</div>
+      <div class="bal" style="margin-top:8px">${money(d.balance)}</div>
+      <div class="meta">${d.apr}% APR · minimum ${money(d.minPay)}/mo${interestNow>0.5?` · about ${money(interestNow)} interest this month`:""}</div>
+      <div class="bar"><i style="width:${paidPct}%"></i></div>
+      <div class="meta">${Math.floor(paidPct)}% paid of ${money(Math.max(d.original,d.balance))}</div>
+      <div class="actions">${d.balance>0.004?`<button class="btn" data-act="pay" data-id="${d.id}">Log payment</button><button class="btn" data-act="bal" data-id="${d.id}">Update balance</button>`:""}<button class="btn" data-act="edit" data-id="${d.id}">Edit</button>
+      ${S.settings.strategy==="custom"&&d.balance>0.004?`<button class="btn" data-act="up" data-id="${d.id}" aria-label="Move up">↑</button><button class="btn" data-act="down" data-id="${d.id}" aria-label="Move down">↓</button>`:""}</div>
+    </div>`;
+  }).join("");
+  return `<div class="card" style="display:flex;justify-content:space-between;align-items:center"><div><h3 style="margin:0">Total owed</h3><div style="font-family:var(--serif);font-size:24px;font-weight:700">${money(totals().left)}</div></div><button class="btn amber" data-act="addDebt">+ Add debt</button></div>
+  <p class="hint" style="margin:-4px 4px 12px">Shown in the order you'll pay them off with ${stratName()}.</p><div class="debt-grid">${cards}</div>`;
+}
+function viewPlan(){
+  if (!S.debts.length) return emptyState();
+  const P = plan(), m = P.main;
+  const alt = simulate(S.settings.strategy==="avalanche"?"snowball":"avalanche", P.budget);
+  const max = Math.max(1, ...Object.values(m.paid).map(v=>v+1));
+  const tl = (m.order||[]).map(id=>{ const d=S.debts.find(x=>x.id===id); const mo=m.paid[id]; const w = mo===undefined?100:((mo+1)/max*100);
+    return `<div class="t"><div class="nm" title="${esc(d.name)}">${esc(d.name)}</div><div class="track"><div class="fill" style="width:${Math.max(w,30)}%">${mo===undefined?"—":monthLabel(mo)}</div></div></div>`; }).join("");
+  const ids = m.order||[];
+  const rows = m.rows.slice(0, showAll?600:12).map(r=>`<tr><td>${monthLabel(r.m)}</td>${ids.map(id=>{ const v=r.pay[id]; const done=m.paid[id]===r.m; return `<td class="${done?"done":""}">${v?money(v,0):"–"}${done?" ✓":""}</td>`; }).join("")}<td>${money(r.left,0)}</td></tr>`).join("");
+  const cmp = (a,b) => a.ok && b.ok;
+  return `
+  <div class="card"><h2>Your plan</h2>
+    <label class="f">How much can you pay toward debt each month?<input class="i" id="budget" type="number" inputmode="decimal" min="0" step="1" value="${S.settings.budget||""}" placeholder="${round2(P.mins)}"></label>
+    <div class="hint" style="margin:-6px 0 14px">Your minimums add up to <b>${money(P.mins)}</b>. Anything above that is your extra payment, and it's what speeds things up.</div>
+    <div class="seg" role="tablist">${["snowball","avalanche","custom"].map(s=>`<button data-strat="${s}" class="${S.settings.strategy===s?"on":""}">${({snowball:"❄️ Snowball",avalanche:"🏔️ Avalanche",custom:"✋ My order"})[s]}</button>`).join("")}</div>
+    <p class="hint">${({snowball:"Pay the <b>smallest balance</b> first. You clear debts quickly, and each win keeps you going.",avalanche:"Pay the <b>highest interest rate</b> first. This usually costs the least in interest.",custom:"You choose the order. Use the ↑ ↓ buttons on the Debts tab."})[S.settings.strategy]}</p>
+  </div>
+  ${P.short?`<div class="warn">Your budget is below your minimum payments, so the plan uses ${money(P.mins)}.</div>`:""}
+  ${!m.ok?`<div class="warn">${m.reason}</div>`:""}
+  <div class="grid2 grid4" style="margin-bottom:14px">
+    <div class="stat"><div class="l">Debt-free</div><div class="v">${m.ok?monthLabel(m.months-1):"—"}</div></div>
+    <div class="stat"><div class="l">Months to go</div><div class="v">${m.ok?m.months:"—"}</div></div>
+    <div class="stat"><div class="l">Interest you'll pay</div><div class="v">${m.ok?money(m.interest,0):"—"}</div></div>
+    <div class="stat"><div class="l">Interest saved vs minimums</div><div class="v">${cmp(m,P.minOnly)?money(Math.max(0,P.minOnly.interest-m.interest),0):"—"}</div></div>
+  </div>
+  ${cmp(m,alt)?`<div class="card"><h3>Snowball or Avalanche?</h3><p class="how">${(()=>{ const diff=round2(alt.interest-m.interest); const name=S.settings.strategy==="avalanche"?"Snowball":"Avalanche"; if (Math.abs(diff)<1 && alt.months===m.months) return `Both plans finish at the same time and cost about the same here, so pick the one that keeps you motivated.`; return diff>0 ? `Your plan saves <b>${money(diff,0)}</b> compared with ${name}${alt.months>m.months?` and finishes ${alt.months-m.months} month(s) sooner`:""}.` : `${name} would save <b>${money(-diff,0)}</b> in interest${alt.months<m.months?` and finish ${m.months-alt.months} month(s) sooner`:""}. ${S.settings.strategy==="snowball"?"Snowball still gives you quicker wins, which helps many people stick with it.":""}`; })()}</p></div>`:""}
+  <div class="plan-cols"><div>${m.ok?`<div class="card timeline"><h3>When each debt is gone</h3>${tl}</div>`:""}</div><div>
+  ${m.ok?`<div class="card"><h3>Month-by-month payments</h3><div class="scrollx"><table class="plan"><tr><th>Month</th>${ids.map(id=>`<th>${esc(S.debts.find(d=>d.id===id).name)}</th>`).join("")}<th>Left</th></tr>${rows}</table></div>${m.rows.length>12?`<button class="btn" style="margin-top:10px" data-act="toggleAll">${showAll?"Show less":`Show all ${m.rows.length} months`}</button>`:""}
+  <details class="how"><summary>How is this worked out?</summary><p>Each month, interest is added to every balance (APR ÷ 12). Then every debt gets its minimum payment, and everything left over goes to the debt at the top of your order. When a debt is paid off, its payment rolls on to the next one. Real statements can differ a little, so update your balances now and then.</p></details></div>`:""}</div></div>`;
+}
+let showAll = false;
+function viewPayments(){
+  if (!S.debts.length) return emptyState();
+  const list = S.payments.slice().sort((a,b)=>b.date.localeCompare(a.date)||b.t-a.t);
+  const ym = today().slice(0,7);
+  const thisMonth = S.payments.filter(p=>p.date.startsWith(ym)).reduce((a,p)=>a+p.amount,0);
+  const total = S.payments.reduce((a,p)=>a+p.amount,0);
+  return `<div class="grid2" style="margin-bottom:14px"><div class="stat"><div class="l">Paid this month</div><div class="v">${money(thisMonth)}</div></div><div class="stat"><div class="l">Paid in total</div><div class="v">${money(total)}</div></div></div>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px"><h3 style="margin:0">Payment history</h3>${active().length?'<button class="btn amber" data-act="pay">+ Log payment</button>':""}</div>
+  ${list.length? list.map(p=>{ const d=S.debts.find(x=>x.id===p.debtId); return `<div class="row"><div><div class="name">${esc(d?d.name:"Deleted debt")}</div><div class="meta">${new Date(p.date+"T12:00").toLocaleDateString(undefined,{day:"numeric",month:"short",year:"numeric"})}${p.note?" · "+esc(p.note):""}</div></div><div style="display:flex;align-items:center;gap:8px"><div class="amt">${money(p.amount)}</div><button class="btn" style="padding:6px 10px" data-act="undoPay" data-id="${p.id}" aria-label="Delete payment">✕</button></div></div>`; }).join("") : '<div class="empty"><div class="e">🧾</div>No payments yet. Tap <b>+</b> when you pay a debt.</div>'}</div>`;
+}
+function viewSettings(){
+  return `<div class="card"><h2>Settings</h2>
+    <label class="f">Your first name (optional)<input class="i" id="sName" maxlength="20" value="${esc(S.settings.name)}"></label>
+    <label class="f">Currency<select class="i" id="sCur">${CURRENCIES.map(([c,l])=>`<option value="${c}" ${S.settings.currency===c?"selected":""}>${l} (${c})</option>`).join("")}</select></label>
+    <label class="f">Colour theme<div class="pal-row">${Object.entries(THEMES).map(([k,[n,a,b,c]])=>`<button class="pal ${pal()===k?"on":""}" data-pal="${k}"><i><b style="background:${a}"></b><b style="background:${b}"></b><b style="background:${c};border:1px solid #ddd"></b></i>${n}</button>`).join("")}</div></label>
+    <label class="f">Light or dark<div class="seg" style="grid-template-columns:1fr 1fr"><button data-mode="light" class="${mode()==="light"?"on":""}">☀️ Light</button><button data-mode="dark" class="${mode()==="dark"?"on":""}">🌙 Dark</button></div></label>
+  </div>
+  <div class="card"><h2>Backups</h2>
+    <p class="hint" style="margin:-4px 0 12px">Your data is saved only in this browser. Download a backup now and then, and use it to move to a new phone or computer.</p>
+    <div class="actions">${DEMO?'<span class="hint">Backups are part of the full app.</span>':'<button class="btn" data-act="export">⬇️ Download backup</button><button class="btn" data-act="import">⬆️ Restore backup</button><button class="btn" data-act="csv">📄 Export payments (CSV)</button>'}</div>
+  </div>
+  <div class="card"><h2>Add to your Home Screen</h2><p class="hint" style="margin:0">iPhone: open in Safari, tap Share, then <b>Add to Home Screen</b>.<br>Android: open in Chrome, tap the three-dot menu, then <b>Add to Home screen</b>.<br>It opens like an app, and your data stays on your phone.</p></div>
+  <div class="card"><h2>Start over</h2><p class="hint" style="margin:-4px 0 12px">Deletes every debt and payment on this device.</p><button class="btn danger" data-act="reset">Delete all my data</button></div>
+  <p class="hint" style="text-align:center">Lantern Debt${DEMO?" · free demo":""} · made by LittleLanternApps</p>`;
+}
+
+/* ---------- Events ---------- */
+function bindView(){
+  const v = $("#view");
+  v.querySelectorAll("[data-act]").forEach(b=>b.addEventListener("click", e=>{ e.preventDefault(); act(b.dataset.act, b.dataset.id); }));
+  v.querySelectorAll("[data-go]").forEach(a=>a.addEventListener("click", e=>{ e.preventDefault(); go(a.dataset.go); }));
+  v.querySelectorAll("[data-strat]").forEach(b=>b.addEventListener("click", ()=>{ S.settings.strategy=b.dataset.strat; if (b.dataset.strat==="custom" && !S.settings.customOrder.length) S.settings.customOrder = orderDebts(S.debts,"snowball").map(d=>d.id); save(); render(); }));
+  v.querySelectorAll("[data-pal]").forEach(b=>b.addEventListener("click", e=>{ e.preventDefault(); S.settings.theme=b.dataset.pal+"-"+mode(); S.settings.themeLocked=true; save(); render(); }));
+  v.querySelectorAll("[data-mode]").forEach(b=>b.addEventListener("click", e=>{ e.preventDefault(); S.settings.theme=pal()+"-"+b.dataset.mode; S.settings.themeLocked=true; save(); render(); }));
+  const bud = $("#budget"); if (bud) bud.addEventListener("change", ()=>{ S.settings.budget = Math.max(0, parseFloat(bud.value)||0); save(); render(); });
+  const sn = $("#sName"); if (sn) sn.addEventListener("change", ()=>{ S.settings.name = sn.value.trim(); save(); render(); });
+  const sc = $("#sCur"); if (sc) sc.addEventListener("change", ()=>{ S.settings.currency = sc.value; save(); render(); });
+}
+function go(t){ tab=t; showAll=false; render(); window.scrollTo(0,0); }
+document.querySelectorAll("nav.tabs button").forEach(b=>b.addEventListener("click", ()=>go(b.dataset.tab)));
+$("#fab").addEventListener("click", ()=>act("pay"));
+
+let editing = null, balId = null;
+function act(a, id){
+  if (a==="addDebt"){
+    if (DEMO && S.debts.length>=DEMO_MAX_DEBTS) return upsell(`The free demo holds ${DEMO_MAX_DEBTS} debts.`);
+    editing=null; $("#debtDlgTitle").textContent="Add a debt"; $("#debtForm").reset(); $("#dDelete").classList.add("hidden"); $("#dHint").textContent=""; $("#debtDlg").showModal(); $("#dName").focus();
+  }
+  if (a==="edit"){
+    const d=S.debts.find(x=>x.id===id); editing=id; $("#debtDlgTitle").textContent="Edit debt";
+    $("#dName").value=d.name; $("#dType").value=d.type; $("#dBal").value=d.balance; $("#dApr").value=d.apr; $("#dMin").value=d.minPay;
+    $("#dDelete").classList.remove("hidden"); hintMin(); $("#debtDlg").showModal();
+  }
+  if (a==="pay"){
+    if (DEMO && S.payments.length>=DEMO_MAX_PAYMENTS) return upsell(`The free demo holds ${DEMO_MAX_PAYMENTS} payments.`);
+    const list = orderDebts(active(), S.settings.strategy);
+    $("#pDebt").innerHTML = list.map(d=>`<option value="${d.id}">${esc(d.name)} · ${money(d.balance)} left</option>`).join("");
+    if (id) $("#pDebt").value=id;
+    $("#payForm").reset(); if (id) $("#pDebt").value=id; $("#pDate").value=today();
+    const P=plan(); const first=P.main.rows[0]; const sel=$("#pDebt").value; if (first && first.pay[sel]) $("#pAmt").placeholder = round2(first.pay[sel]);
+    $("#payDlg").showModal();
+  }
+  if (a==="bal"){ balId=id; const d=S.debts.find(x=>x.id===id); $("#bVal").value=d.balance; $("#balLabel").firstChild.textContent=`New balance for ${d.name}`; $("#balDlg").showModal(); }
+  if (a==="undoPay"){
+    const p=S.payments.find(x=>x.id===id); if (!p || !confirmBox(`Delete this ${money(p.amount)} payment? It will be added back to the balance.`)) return;
+    const d=S.debts.find(x=>x.id===p.debtId); if (d) d.balance=round2(d.balance+p.amount);
+    S.payments=S.payments.filter(x=>x.id!==id); save(); render(); toast("Payment deleted");
+  }
+  if (a==="up"||a==="down"){
+    const o = orderDebts(S.debts,"custom").map(d=>d.id); const i=o.indexOf(id), j=a==="up"?i-1:i+1;
+    if (j<0||j>=o.length) return; [o[i],o[j]]=[o[j],o[i]]; S.settings.customOrder=o; save(); render();
+  }
+  if (a==="toggleAll"){ showAll=!showAll; render(); }
+  if (a==="export"){ download(`lantern-debt-backup-${today()}.json`, JSON.stringify(S,null,1), "application/json"); toast("Backup downloaded"); }
+  if (a==="import") $("#importFile").click();
+  if (a==="csv"){
+    const lines=[["Date","Debt","Amount","Note"],...S.payments.slice().sort((a,b)=>a.date.localeCompare(b.date)).map(p=>[p.date,(S.debts.find(d=>d.id===p.debtId)||{}).name||"",p.amount,p.note||""])];
+    download(`lantern-debt-payments-${today()}.csv`, lines.map(r=>r.map(c=>`"${String(c).replace(/"/g,'""')}"`).join(",")).join("\n"), "text/csv");
+  }
+  if (a==="reset"){ if (confirmBox("Delete all debts and payments on this device? This can't be undone unless you have a backup.")){ S=blank(); save(); go("home"); toast("Everything was deleted"); } }
+}
+function confirmBox(msg){ return window.confirm(msg); }
+function upsell(msg){ showCelebrate("🔦","That's the demo limit",`${msg} The full Lantern Debt app has no limits, plus backups and CSV export.`, `<a class="btn amber" style="display:inline-block;margin-top:12px;text-decoration:none" href="${SHOP_LINK}" target="_blank" rel="noopener">Get the full app</a>`, false); }
+function download(name, text, type){ const a=document.createElement("a"); a.href=URL.createObjectURL(new Blob([text],{type})); a.download=name; document.body.appendChild(a); a.click(); a.remove(); }
+
+function hintMin(){
+  const bal=parseFloat($("#dBal").value)||0, apr=parseFloat($("#dApr").value)||0, min=parseFloat($("#dMin").value)||0;
+  const i=bal*apr/1200;
+  $("#dHint").textContent = (bal>0 && min>0 && min<=i) ? `⚠️ This minimum (${money(min)}) doesn't cover this month's interest (about ${money(i)}), so this debt would never shrink on minimums alone.` : (i>0.5?`About ${money(i)} of interest is added each month at this rate.`:"");
+}
+["#dBal","#dApr","#dMin"].forEach(s=>$(s).addEventListener("input", hintMin));
+$("#dCancel").addEventListener("click", ()=>$("#debtDlg").close());
+$("#pCancel").addEventListener("click", ()=>$("#payDlg").close());
+$("#bCancel").addEventListener("click", ()=>$("#balDlg").close());
+$("#dDelete").addEventListener("click", ()=>{
+  const d=S.debts.find(x=>x.id===editing); if (!d || !confirmBox(`Delete ${d.name} and its payment history?`)) return;
+  S.debts=S.debts.filter(x=>x.id!==editing); S.payments=S.payments.filter(p=>p.debtId!==editing); S.settings.customOrder=S.settings.customOrder.filter(x=>x!==editing);
+  save(); $("#debtDlg").close(); render(); toast("Debt deleted");
+});
+$("#debtForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const name=$("#dName").value.trim(), bal=round2(parseFloat($("#dBal").value)), apr=Math.max(0,parseFloat($("#dApr").value)||0), min=round2(parseFloat($("#dMin").value));
+  if (!name || !(bal>=0) || !(min>=0)) return;
+  if (editing){ const d=S.debts.find(x=>x.id===editing); Object.assign(d,{name,type:$("#dType").value,apr,minPay:min}); if (bal!==d.balance){ d.balance=bal; if (bal>d.original) d.original=bal; } }
+  else { const d={id:uid(),name,type:$("#dType").value,balance:bal,original:bal,apr,minPay:min,added:today()}; S.debts.push(d); if (S.settings.customOrder.length) S.settings.customOrder.push(d.id); }
+  save(); $("#debtDlg").close(); checkMilestones(); render(); toast(editing?"Saved":"Debt added");
+});
+$("#pDebt").addEventListener("change", ()=>{ const P=plan(); const f=P.main.rows[0]; const v=$("#pDebt").value; $("#pAmt").placeholder = f&&f.pay[v] ? round2(f.pay[v]) : ""; });
+$("#payForm").addEventListener("submit", e=>{
+  e.preventDefault();
+  const d=S.debts.find(x=>x.id===$("#pDebt").value); let amt=round2(parseFloat($("#pAmt").value));
+  if (!d || !(amt>0)) return;
+  amt=Math.min(amt, d.balance);
+  S.payments.push({id:uid(),debtId:d.id,amount:amt,date:$("#pDate").value||today(),note:$("#pNote").value.trim(),t:Date.now()});
+  d.balance=round2(d.balance-amt);
+  save(); $("#payDlg").close();
+  const justPaid = d.balance<=0.004;
+  const got = checkMilestones();
+  render();
+  if (justPaid && !active().length) showCelebrate("🏆","You're debt free!","Every debt is paid off. What an achievement. Time to celebrate!");
+  else if (justPaid) showCelebrate("🔥",`${d.name} is paid off!`,`One down, ${active().length} to go. Its payment now rolls on to your next debt.`);
+  else if (got.length){ const b=BADGES.find(x=>x[0]===got[got.length-1]); showCelebrate(b[1], b[2]+"!", `You've paid off ${Math.floor(totals().pct)}% of your debt. Keep going!`); }
+  else toast(`${money(amt)} logged. ${money(d.balance)} left on ${d.name}`);
+});
+$("#balForm").addEventListener("submit", e=>{
+  e.preventDefault(); const d=S.debts.find(x=>x.id===balId); const v=round2(parseFloat($("#bVal").value));
+  if (!d || !(v>=0)) return; d.balance=v; if (v>d.original) d.original=v; save(); $("#balDlg").close(); checkMilestones(); render(); toast("Balance updated");
+});
+$("#importFile").addEventListener("change", async e=>{
+  const f=e.target.files[0]; if (!f) return;
+  try { const s=JSON.parse(await f.text()); if (!Array.isArray(s.debts)) throw 0; if (!confirmBox("Replace what's on this device with this backup?")) return; S=Object.assign(blank(), s, {settings:Object.assign(blank().settings,s.settings)}); save(); go("home"); toast("Backup restored"); }
+  catch(_){ toast("That file isn't a Lantern Debt backup"); }
+  e.target.value="";
+});
+
+function checkMilestones(){
+  const t=totals(), got=[];
+  const add=k=>{ if(!S.milestones.includes(k)){ S.milestones.push(k); got.push(k);} };
+  if (S.payments.length) add("first");
+  if (S.debts.some(d=>d.balance<=0.004 && d.original>0)) add("debt1");
+  if (t.orig>0){ if (t.pct>=25) add("p25"); if (t.pct>=50) add("p50"); if (t.pct>=75) add("p75"); }
+  if (S.debts.length && !active().length && t.orig>0) add("free");
+  if (got.length) save();
+  return got.filter(k=>k.startsWith("p"));
+}
+
+/* ---------- Feedback ---------- */
+let toastT;
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toastT); toastT=setTimeout(()=>t.classList.remove("show"),2600); }
+function showCelebrate(e,t,p,extra="",party=true){ $("#celE").textContent=e; $("#celT").textContent=t; $("#celP").innerHTML=esc(p)+extra; $("#celebrate").classList.add("show"); if(party) confetti(); }
+$("#celClose").addEventListener("click", ()=>$("#celebrate").classList.remove("show"));
+function confetti(){
+  if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+  const c=$("#confetti"), x=c.getContext("2d"), dpr=devicePixelRatio||1; c.width=innerWidth*dpr; c.height=innerHeight*dpr;
+  const cols=["#e8a33d","#2f8f6b","#ffd38a","#1e2a44","#c2554a"]; let ps=Array.from({length:140},()=>({x:c.width/2,y:c.height*0.35,vx:(Math.random()-.5)*16*dpr,vy:(Math.random()*-14-4)*dpr,r:Math.random()*6+4,c:cols[Math.floor(Math.random()*5)],l:120}));
+  (function f(){ x.clearRect(0,0,c.width,c.height); ps=ps.filter(p=>p.l-->0); for(const p of ps){ p.x+=p.vx; p.y+=p.vy; p.vy+=0.4*dpr; x.globalAlpha=Math.min(1,p.l/40); x.fillStyle=p.c; x.fillRect(p.x,p.y,p.r*dpr,p.r*1.6*dpr);} x.globalAlpha=1; if(ps.length) requestAnimationFrame(f); else x.clearRect(0,0,c.width,c.height); })();
+}
+
+render();
+</script>
+</body>
+</html>
